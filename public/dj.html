@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Panell DJ</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>🎛️ Panell DJ</h1>
+
+<form id="createEventForm">
+    <input id="eventName" placeholder="Nom del event" required>
+    <input id="eventCodeInput" placeholder="Codi opcional (deixar buit per generar)">
+    <input id="eventDate" type="date" required>
+    <button type="submit">Crear Event</button>
+</form>
+
+<div id="eventInfo"></div>
+
+<h2>Selecciona Event</h2>
+<select id="eventSelector">
+    <option value="">-- Tria un event --</option>
+</select>
+<button id="deleteEventBtn">Esborrar Event</button>
+
+<p id="eventCodeDisplay"></p> <!-- Aquí mostrarem el codi -->
+
+<h2>Cançons sol·licitades</h2>
+<ul id="requestedList"></ul>
+
+<h2>Cançons reproduïdes</h2>
+<ul id="playedList"></ul>
+
+<h2>Cançons rebutjades</h2>
+<ul id="rejectedList"></ul>
+
+
+<script src="dj.js"></script>
+</body>
+</html>

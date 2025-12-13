@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Peticions Cançons</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>🎧 Envia la teva cançó</h1>
+
+<input id="eventCode" placeholder="Codi del event">
+<button id="joinEvent">Accedir Event</button>
+
+<div id="clientSection" style="display:none;">
+    <input id="searchInput" placeholder="Cerca cançó o artista">
+    <button id="searchButton">Buscar</button>
+    <div id="searchResults"></div>
+
+    <h2>Cançons sol·licitades</h2>
+    <ul id="songRankingList"></ul>
+</div>
+
+<script src="client.js"></script>
+</body>
+</html>
