@@ -1,29 +1,6 @@
 {
   "songs": [
-    {
-      "trackId": "3GfOAdcoc3X5GPiiXmpBjK",
-      "title": "Song 2",
-      "artist": "Blur",
-      "votes": 2
-    },
-    {
-      "trackId": "34auFYlw0zhZWmAzsYcFVd",
-      "title": "Ddd",
-      "artist": "Don Bigg",
-      "votes": 1
-    },
-    {
-      "trackId": "26QJuQfM8PVAWkIm1JRyqq",
-      "title": "ss",
-      "artist": "Ken Carson",
-      "votes": 1
-    },
-    {
-      "trackId": "21j6La3df4nIaR5NxNITr9",
-      "title": "YYY",
-      "artist": "JC Reyes",
-      "votes": 1
-    }
+    
   ],
   "events": [
     {
