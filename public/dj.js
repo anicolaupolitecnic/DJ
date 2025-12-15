@@ -1,185 +1,135 @@
-// dj.js
-
-const form = document.getElementById('createEventForm');
-const eventInfo = document.getElementById('eventInfo');
+const createForm = document.getElementById('createEventForm');
 const eventSelector = document.getElementById('eventSelector');
-const deleteEventBtn = document.getElementById('deleteEventBtn');
-
-const requestedList = document.getElementById('requestedList');
-const playedList = document.getElementById('playedList');
-const rejectedList = document.getElementById('rejectedList');
+const deleteBtn = document.getElementById('deleteEventBtn');
 const eventCodeDisplay = document.getElementById('eventCodeDisplay');
 
-let eventId = null;
-let rankingInterval = null;
+const requestedTableBody = document.querySelector('#requestedTable tbody');
+const playedTableBody = document.querySelector('#playedTable tbody');
+const rejectedTableBody = document.querySelector('#rejectedTable tbody');
 
-// ------------------------- Crear event ----------------------------------
-form.addEventListener('submit', async e => {
+let currentEventId = null;
+
+// ----------------- CREAR EVENT -----------------
+createForm.addEventListener('submit', async e => {
     e.preventDefault();
-
-    const name = document.getElementById('eventName').value;
+    const name = document.getElementById('eventName').value.trim();
+    const code = document.getElementById('eventCodeInput').value.trim();
     const date = document.getElementById('eventDate').value;
-    const code = document.getElementById('eventCodeInput')?.value; // input opcional pel codi
 
-    if (!name || !date) {
-        alert('Nom i data requerits');
-        return;
-    }
-
-    try {
-        const res = await fetch('/api/event', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, date, code })
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            eventId = data.event.id;
-            eventInfo.innerHTML = `Event creat! Codi: <strong>${eventId}</strong>`;
-            alert(`Event creat! Codi: ${eventId}`);
-            loadEvents();
-            startRankingAutoUpdate();
-        } else {
-            alert(data.error || 'Error creant event');
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Error creant event');
-    }
+    const res = await fetch('/api/event', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name,date,code})
+    });
+    const data = await res.json();
+    if(res.ok){ alert('Event creat correctament!'); loadEvents(); }
+    else alert(data.error);
 });
 
-// ------------------------- Carregar events -----------------------------
-async function loadEvents() {
+// ----------------- ESBORRAR EVENT -----------------
+deleteBtn.addEventListener('click', async () => {
+    if(!currentEventId) return alert('Tria un event');
+    const res = await fetch(`/api/event/${currentEventId}`, { method:'DELETE' });
+    const data = await res.json();
+    if(res.ok) { alert('Event esborrat'); currentEventId=null; loadEvents(); clearTables(); }
+    else alert(data.error);
+});
+
+// ----------------- SELECCIONAR EVENT -----------------
+eventSelector.addEventListener('change', e => {
+    currentEventId = e.target.value;
+    eventCodeDisplay.textContent = currentEventId ? `Codi: ${currentEventId}` : '';
+    if(currentEventId) fetchAllSongs();
+});
+
+// ----------------- CÀRREGA EVENTS -----------------
+async function loadEvents(){
     const res = await fetch('/api/events');
     const events = await res.json();
-
-    // Netejar el selector abans d'afegir opcions noves
-    eventSelector.innerHTML = '';
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = '-- Tria un event --';
-    eventSelector.appendChild(defaultOption);
-
-    events.forEach(e => {
-        const option = document.createElement('option');
-        option.value = e.id;
-        option.textContent = `${e.name} (${e.date})`;
-        eventSelector.appendChild(option);
+    eventSelector.innerHTML = '<option value="">-- Tria un event --</option>';
+    events.forEach(ev=>{
+        const opt=document.createElement('option');
+        opt.value=ev.id;
+        opt.textContent=`${ev.name} (${ev.date})`;
+        eventSelector.appendChild(opt);
     });
 }
 
-// ------------------------- Seleccionar event ---------------------------
-eventSelector.addEventListener('change', () => {
-    eventId = eventSelector.value;
+// ----------------- FETCH CANÇONS -----------------
+async function fetchAllSongs() {
+    if(!currentEventId) return;
+    const res = await fetch(`/api/event/${currentEventId}/all-songs`);
+    const songs = await res.json();
 
-    if (eventId) {
-        eventCodeDisplay.textContent = `Codi de l'event: ${eventId}`;
-        fetchRanking();
-        startRankingAutoUpdate();
-    } else {
-        eventCodeDisplay.textContent = '';
-        requestedList.innerHTML = '';
-        playedList.innerHTML = '';
-        rejectedList.innerHTML = '';
-        stopRankingAutoUpdate();
-    }
-});
+    requestedTableBody.innerHTML='';
+    playedTableBody.innerHTML='';
+    rejectedTableBody.innerHTML='';
 
-// ------------------------- Esborrar event -----------------------------
-deleteEventBtn.addEventListener('click', async () => {
-    if (!eventId) {
-        alert('Tria primer un event!');
-        return;
-    }
+    // Sol·licitades
+    songs.filter(s=>s.status==='sol·licitada').sort((a,b)=>b.votes-a.votes).forEach(s=>{
+        const img=s.cover || 'https://via.placeholder.com/50';
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+            <td><img src="${img}" width="50" height="50"></td>
+            <td>${s.title}</td>
+            <td>${s.artist}</td>
+            <td>${s.votes}</td>
+            <td>
+                <button class="btn-dj" onclick="updateSongStatus('${s.trackId}','reproduida')">✅</button>
+                <button class="btn-dj btn-red" onclick="updateSongStatus('${s.trackId}','rebutjada')">❌</button>
+            </td>
+        `;
+        requestedTableBody.appendChild(tr);
+    });
 
-    if (!confirm('Segur que vols esborrar aquest event? Aquesta acció no es pot desfer.')) return;
+    // Reproduïdes
+    songs.filter(s=>s.status==='reproduida').forEach(s=>{
+        const img=s.cover || 'https://via.placeholder.com/50';
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td><img src="${img}" width="50" height="50"></td><td>${s.title}</td><td>${s.artist}</td>`;
+        playedTableBody.appendChild(tr);
+    });
 
-    const res = await fetch(`/api/event/${eventId}`, { method: 'DELETE' });
-    const data = await res.json();
+    // Rebutjades
+    songs.filter(s=>s.status==='rebutjada').forEach(s=>{
+        const img=s.cover || 'https://via.placeholder.com/50';
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td><img src="${img}" width="50" height="50"></td><td>${s.title}</td><td>${s.artist}</td>`;
+        rejectedTableBody.appendChild(tr);
+    });
+}
 
-    if (res.ok) {
-        alert(data.message);
-        eventId = null;
-        eventSelector.value = '';
-        eventCodeDisplay.textContent = '';
-        requestedList.innerHTML = '';
-        playedList.innerHTML = '';
-        rejectedList.innerHTML = '';
-        stopRankingAutoUpdate();
-        loadEvents();
-    } else {
-        alert(data.error || 'Error esborrant event');
-    }
-});
-
-// ------------------------- Actualitzar estat cançó --------------------
-async function updateSongStatus(trackId, status) {
-    if (!eventId) {
-        alert('Tria primer un event!');
-        return;
-    }
-
-    try {
-        const res = await fetch(`/api/event/${eventId}/song-status`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ trackId, status })
+// ----------------- CANVIAR ESTAT CANÇÓ -----------------
+async function updateSongStatus(trackId,status){
+    if(!currentEventId) return alert('Tria primer un event!');
+    try{
+        const res=await fetch(`/api/event/${currentEventId}/song-status`, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({trackId,status})
         });
-
-        const data = await res.json();
-        alert(data.message);
-        fetchRanking();
-    } catch (err) {
-        console.error(err);
-        alert('Error actualitzant estat cançó');
-    }
+        if(!res.ok){ const err=await res.json(); return alert(err.error||'Error'); }
+        fetchAllSongs();
+    } catch(err){ console.error(err); }
 }
 
-// ------------------------- Carregar ranking / llistes ------------------
-async function fetchRanking() {
-    if (!eventId) return;
-    try {
-        const res = await fetch(`/api/event/${eventId}/all-songs`);
-        const songs = await res.json();
-
-        requestedList.innerHTML = '';
-        playedList.innerHTML = '';
-        rejectedList.innerHTML = '';
-
-        songs.forEach((song, i) => {
-            const li = document.createElement('li');
-            li.innerHTML = `<strong>${song.title}</strong> - ${song.artist} (${song.votes} vots)`;
-
-            if (song.status === 'sol·licitada') {
-                li.innerHTML += `
-                    <button onclick="updateSongStatus('${song.trackId}','reproduida')">Reproduïda</button>
-                    <button onclick="updateSongStatus('${song.trackId}','rebutjada')">Rebutjada</button>`;
-                requestedList.appendChild(li);
-            } else if (song.status === 'reproduida') {
-                playedList.appendChild(li);
-            } else if (song.status === 'rebutjada') {
-                rejectedList.appendChild(li);
-            }
-        });
-    } catch (err) {
-        console.error(err);
-    }
+// ----------------- ESBORRAR LLISTA -----------------
+async function clearList(listType){
+    if(!currentEventId) return alert('Tria primer un event!');
+    try{
+        const res=await fetch(`/api/event/${currentEventId}/clear-${listType}`, { method:'DELETE' });
+        if(!res.ok){ const err=await res.json(); return alert(err.error||'Error'); }
+        fetchAllSongs();
+    } catch(err){ console.error('Error esborrant llista:', err); }
 }
 
-// ------------------------- Auto refresh ranking -----------------------
-function startRankingAutoUpdate() {
-    stopRankingAutoUpdate(); // aturar interval existent
-    rankingInterval = setInterval(fetchRanking, 5000);
-}
-
-function stopRankingAutoUpdate() {
-    if (rankingInterval) {
-        clearInterval(rankingInterval);
-        rankingInterval = null;
-    }
-}
-
-// ------------------------- Inicialització -----------------------------
+// ----------------- INICIALITZACIÓ -----------------
 loadEvents();
+setInterval(()=>{ if(currentEventId) fetchAllSongs(); },5000);
+
+function clearTables(){
+    requestedTableBody.innerHTML='';
+    playedTableBody.innerHTML='';
+    rejectedTableBody.innerHTML='';
+    eventCodeDisplay.textContent='';
+}

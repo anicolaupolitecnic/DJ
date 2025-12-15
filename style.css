@@ -58,3 +58,22 @@ button#searchButton {
     padding: 5px 10px;
     cursor: pointer;
 }
+
+/* Botons de DJ */
+.btn-dj {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #e0ffe0; /* verd suau */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2px;
+}
+
+.btn-dj.btn-red {
+    background-color: #ffe0e0; /* vermell suau */
+}

@@ -1,21 +1,38 @@
 let eventId = null;
 
-document.getElementById('joinEvent').addEventListener('click', async () => {
-    eventId = document.getElementById('eventCode').value.trim();
+const joinBtn = document.getElementById('joinEvent');
+const eventCodeInput = document.getElementById('eventCode');
+const clientSection = document.getElementById('clientSection');
+const searchInput = document.getElementById('searchInput');
+const searchButton = document.getElementById('searchButton');
+const searchResultsTable = document.getElementById('searchResults');
+const songRankingTable = document.getElementById('songRankingList');
+const searchResultsBody = searchResultsTable.querySelector('tbody');
+const songRankingBody = songRankingTable.querySelector('tbody');
+
+let spotifyToken = '';
+let rankingInterval = null;
+
+// --------------------------- ACCEDIR EVENT ---------------------------
+joinBtn.addEventListener('click', async () => {
+    eventId = eventCodeInput.value.trim();
     if (!eventId) return alert('Introdueix un codi d’event');
 
-    const res = await fetch(`/api/event/${eventId}`);
-    if (!res.ok) return alert('Event no trobat');
+    try {
+        const res = await fetch(`/api/event/${eventId}`);
+        if (!res.ok) return alert('Event no trobat');
 
-    document.getElementById('clientSection').style.display = 'block';
-    fetchRequestedSongs();
-    setInterval(fetchRequestedSongs, 5000); // refresc cada 5 segons
+        clientSection.style.display = 'block';
+        fetchRequestedSongs();
+        if (rankingInterval) clearInterval(rankingInterval);
+        rankingInterval = setInterval(fetchRequestedSongs, 5000);
+    } catch (err) {
+        console.error(err);
+        alert('Error accedint a l’event');
+    }
 });
 
-// Cerca i votacions (igual que abans però amb /api/event/:id)
-document.getElementById('searchButton').addEventListener('click', searchSpotify);
-let spotifyToken = '';
-
+// --------------------------- TOKEN SPOTIFY ---------------------------
 async function fetchToken() {
     try {
         const res = await fetch('/api/token');
@@ -26,57 +43,92 @@ async function fetchToken() {
     }
 }
 
+// --------------------------- CERCA SPOTIFY ---------------------------
+searchButton.addEventListener('click', searchSpotify);
+
 async function searchSpotify() {
-    const query = document.getElementById('searchInput').value.trim();
+    const query = searchInput.value.trim();
     if (!query || !eventId) return;
 
-    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-    const data = await res.json();
-    displayResults(data.tracks.items);
+    if (!spotifyToken) await fetchToken();
+
+    try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        displayResults(data.tracks.items);
+    } catch (err) {
+        console.error('Error cerca Spotify:', err);
+    }
 }
 
+// --------------------------- MOSTRAR RESULTATS ---------------------------
 function displayResults(tracks) {
-    const resultsDiv = document.getElementById('searchResults');
-    resultsDiv.innerHTML = '';
+    searchResultsBody.innerHTML = '';
+
     tracks.forEach(track => {
-        const div = document.createElement('div');
-        div.innerHTML = `
-            ${track.name} - ${track.artists[0].name}
-            <button onclick="requestSong('${track.id}','${track.name.replace(/'/g,"\\'")}','${track.artists[0].name.replace(/'/g,"\\'")}')">Pedir/Votar</button>
+        const imgUrl = track.album.images.length ? track.album.images[0].url : 'https://via.placeholder.com/50';
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+            <td><img src="${imgUrl}" width="50" height="50"/></td>
+            <td>${track.name}</td>
+            <td>${track.artists.map(a=>a.name).join(', ')}</td>
+            <td>
+                <button onclick="requestSong('${track.id}','${track.name.replace(/'/g,"\\'")}','${track.artists[0].name.replace(/'/g,"\\'")}','${imgUrl}')">
+                    Pedir/Votar
+                </button>
+            </td>
         `;
-        resultsDiv.appendChild(div);
+
+        searchResultsBody.appendChild(tr);
     });
 }
 
-async function requestSong(trackId, title, artist) {
+// --------------------------- PETICIÓ CANÇÓ ---------------------------
+async function requestSong(trackId, title, artist, cover) {
     if (!eventId) return;
-    const res = await fetch(`/api/event/${eventId}/request`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({trackId,title,artist})
-    });
-    const data = await res.json();
-    alert(`Vots: ${data.votes}`);
-    fetchRequestedSongs();
+
+    try {
+        const res = await fetch(`/api/event/${eventId}/request`, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({trackId,title,artist,cover})
+        });
+
+        if (!res.ok) {
+            const errData = await res.json();
+            return alert(errData.error || 'Error sol·licitant cançó');
+        }
+
+        const data = await res.json();
+        alert(`Cançó sol·licitada! Vots: ${data.votes}`);
+        fetchRequestedSongs();
+
+    } catch (err) {
+        console.error('Error sol·licitant cançó:', err);
+    }
 }
 
-// --------------------------
-// 🔹 FETCH CANÇONS SOL·LICITADES
-// --------------------------
+// --------------------------- FETCH CANÇONS SOL·LICITADES ---------------------------
 async function fetchRequestedSongs() {
     if (!eventId) return;
 
     try {
-        const res = await fetch(`/api/event/${eventId}/requested`); // nou endpoint
+        const res = await fetch(`/api/event/${eventId}/requested`);
         const songs = await res.json();
 
-        const ul = document.getElementById('songRankingList');
-        ul.innerHTML = '';
+        songRankingBody.innerHTML = '';
 
         songs.forEach((s,i)=> {
-            const li = document.createElement('li');
-            li.innerHTML = `${i+1}. ${s.title} - ${s.artist} (${s.votes} vots)`;
-            ul.appendChild(li);
+            const imgUrl = s.cover && s.cover.length ? s.cover : 'https://via.placeholder.com/50';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><img src="${imgUrl}" width="50" height="50"/></td>
+                <td>${s.title}</td>
+                <td>${s.artist}</td>
+                <td>${s.votes}</td>
+            `;
+            songRankingBody.appendChild(tr);
         });
 
     } catch (error) {
@@ -84,5 +136,5 @@ async function fetchRequestedSongs() {
     }
 }
 
-// Inicialització
+// --------------------------- INICIALITZACIÓ ---------------------------
 fetchToken();

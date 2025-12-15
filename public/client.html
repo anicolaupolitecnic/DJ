@@ -4,20 +4,142 @@
 <meta charset="UTF-8">
 <title>Peticions Cançons</title>
 <link rel="stylesheet" href="style.css">
+<style>
+    /* TOP BAR */
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        flex-wrap: wrap;
+    }
+
+    .top-bar img {
+        height: clamp(40px, 8vw, 100px);
+        width: auto;
+    }
+
+    .top-bar h1 {
+        flex: 1;
+        text-align: center;
+        font-size: clamp(1rem, 3vw, 2rem);
+        margin: 0 10px;
+    }
+
+    /* CLIENT SECTION */
+    .client-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        padding: 20px;
+        height: 80vh;
+    }
+
+    .search-results-container, .requested-container {
+        background: rgba(0,0,0,0.6);
+        border-radius: 8px;
+        padding: 15px;
+        overflow-y: auto;
+        height: 100%;
+    }
+
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: clamp(0.7rem, 1.5vw, 1rem);
+    }
+
+    .results-table th, .results-table td {
+        padding: 8px;
+        border-bottom: 1px solid #333;
+        text-align: left;
+    }
+
+    .results-table img {
+        width: clamp(30px, 5vw, 50px);
+        height: clamp(30px, 5vw, 50px);
+        border-radius: 6px;
+    }
+
+    input, button {
+        font-size: clamp(0.8rem, 1.5vw, 1rem);
+        padding: 5px 10px;
+    }
+
+    button {
+        background: #1db954;
+        border: none;
+        border-radius: 6px;
+        color: #000;
+        cursor: pointer;
+    }
+
+    h1, h2 {
+        text-align: center;
+        font-size: clamp(1rem, 3vw, 1.8rem);
+    }
+
+    /* ADAPTACIÓ MÒBIL */
+    @media (max-width: 768px) {
+        .client-container {
+            grid-template-columns: 1fr;
+            height: auto;
+        }
+        .search-results-container, .requested-container {
+            height: auto;
+        }
+    }
+</style>
 </head>
 <body>
-<h1>🎧 Envia la teva cançó</h1>
 
-<input id="eventCode" placeholder="Codi del event">
-<button id="joinEvent">Accedir Event</button>
+<div class="top-bar">
+    <img src="/images/logo-left2.png" alt="Logo esquerra">
+    <h1>🎧 DJ MICHAEL SEEN SONG REQUESTS 🎧</h1>
+    <img src="/images/logo-right2.png" alt="Logo dreta">
+</div>
+
+<div style="text-align:center; margin:20px 0;">
+    <input id="eventCode" placeholder="Codi del event">
+    <button id="joinEvent">Accedir Event</button>
+</div>
 
 <div id="clientSection" style="display:none;">
-    <input id="searchInput" placeholder="Cerca cançó o artista">
-    <button id="searchButton">Buscar</button>
-    <div id="searchResults"></div>
+    <div class="client-container">
+        <div class="search-results-container">
+            <div style="display:flex; flex-wrap:wrap; margin-bottom:10px;">
+                <input id="searchInput" placeholder="Cerca cançó o artista" style="flex:1; min-width:120px; margin-right:10px;">
+                <button id="searchButton">Buscar</button>
+            </div>
+            <h2>Resultats de cerca</h2>
+            <table id="searchResults" class="results-table">
+                <thead>
+                    <tr>
+                        <th>Portada</th>
+                        <th>Títol</th>
+                        <th>Artista</th>
+                        <th>Acció</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
 
-    <h2>Cançons sol·licitades</h2>
-    <ul id="songRankingList"></ul>
+        <div class="requested-container">
+            <h2>Cançons sol·licitades</h2>
+            <table id="songRankingList" class="results-table">
+                <thead>
+                    <tr>
+                        <th>Portada</th>
+                        <th>Títol</th>
+                        <th>Artista</th>
+                        <th>Vots</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script src="client.js"></script>
