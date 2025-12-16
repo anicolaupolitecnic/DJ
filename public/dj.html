@@ -11,6 +11,7 @@ body {
     padding: 10px;
     background: #121212;
     color: #fff;
+    font-size: 18px;
 }
 
 /* TOP BAR */
@@ -18,15 +19,16 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: clamp(5px, 2vw, 20px);
+    padding: clamp(5px, 2vw, 5px);
 }
 .top-bar img {
-    height: clamp(40px, 8vw, 100px);
+        height: clamp(200px, 20vw, 300px);
+        width: auto;
 }
 .top-bar h1 {
     flex: 1;
     text-align: center;
-    font-size: clamp(1rem, 3vw, 2rem);
+    font-size: clamp(1rem, 5vw, 10rem);
 }
 
 /* FORMULARIS */
@@ -39,8 +41,11 @@ input, select {
     margin: 5px;
     border-radius: 5px;
     border: none;
+    font-size: 18px;
 }
+
 button {
+    font-size: clamp(2rem, 2vw, 1.2rem);
     background: #1db954;
     color: #000;
     border: none;

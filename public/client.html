@@ -15,14 +15,14 @@
     }
 
     .top-bar img {
-        height: clamp(40px, 8vw, 100px);
+        height: clamp(200px, 20vw, 300px);
         width: auto;
     }
 
     .top-bar h1 {
         flex: 1;
         text-align: center;
-        font-size: clamp(1rem, 3vw, 2rem);
+        font-size: clamp(1.65rem, 1.8vw, 6rem);
         margin: 0 10px;
     }
 
@@ -35,7 +35,8 @@
         height: 80vh;
     }
 
-    .search-results-container, .requested-container {
+    .search-results-container,
+    .requested-container {
         background: rgba(0,0,0,0.6);
         border-radius: 8px;
         padding: 15px;
@@ -46,10 +47,11 @@
     .results-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: clamp(0.7rem, 1.5vw, 1rem);
+        font-size: clamp(1.75rem, 1.5vw, 1rem);
     }
 
-    .results-table th, .results-table td {
+    .results-table th,
+    .results-table td {
         padding: 8px;
         border-bottom: 1px solid #333;
         text-align: left;
@@ -62,8 +64,8 @@
     }
 
     input, button {
-        font-size: clamp(0.8rem, 1.5vw, 1rem);
-        padding: 5px 10px;
+        font-size: clamp(2rem, 1.5vw, 1.1rem);
+        padding: 8px 12px;
     }
 
     button {
@@ -76,16 +78,19 @@
 
     h1, h2 {
         text-align: center;
-        font-size: clamp(1rem, 3vw, 1.8rem);
+        font-size: clamp(1.2rem, 3vw, 2rem);
     }
 
-    /* ADAPTACIÓ MÒBIL */
+    /* ADAPTACIÓ MÒBIL: llistes una sobre l'altra */
     @media (max-width: 768px) {
         .client-container {
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr; /* una columna */
             height: auto;
         }
-        .search-results-container, .requested-container {
+
+        .search-results-container,
+        .requested-container {
+            width: 100%;
             height: auto;
         }
     }
@@ -95,7 +100,7 @@
 
 <div class="top-bar">
     <img src="/images/logo-left2.png" alt="Logo esquerra">
-    <h1>🎧 DJ MICHAEL SEEN SONG REQUESTS 🎧</h1>
+    <h1>🎧 DJ MICHAEL SEEN 🎧 <br> SONG REQUESTS</h1>
     <img src="/images/logo-right2.png" alt="Logo dreta">
 </div>
 
@@ -106,6 +111,22 @@
 
 <div id="clientSection" style="display:none;">
     <div class="client-container">
+
+        <div class="requested-container">
+            <h2>Cançons sol·licitades</h2>
+            <table id="songRankingList" class="results-table">
+                <thead>
+                    <tr>
+                        <th>Portada</th>
+                        <th>Títol</th>
+                        <th>Artista</th>
+                        <th>Vots</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
         <div class="search-results-container">
             <div style="display:flex; flex-wrap:wrap; margin-bottom:10px;">
                 <input id="searchInput" placeholder="Cerca cançó o artista" style="flex:1; min-width:120px; margin-right:10px;">
@@ -125,20 +146,7 @@
             </table>
         </div>
 
-        <div class="requested-container">
-            <h2>Cançons sol·licitades</h2>
-            <table id="songRankingList" class="results-table">
-                <thead>
-                    <tr>
-                        <th>Portada</th>
-                        <th>Títol</th>
-                        <th>Artista</th>
-                        <th>Vots</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+        
     </div>
 </div>
 
