@@ -28,9 +28,6 @@ app.use(session({
     saveUninitialized: false
 }));
 
-/* ⚠️ IMPORTANT:
-   Servim estàtics EXCEPTE dj.html (protegit manualment)
-*/
 app.use(express.static(path.join(__dirname, 'public'), {
     index: false
 }));
@@ -183,6 +180,18 @@ app.get('/api/event/:id', (req,res) => {
     res.json(event);
 });
 
+/* ----------------- ESBORRAR EVENT ----------------- */
+app.delete('/api/event/:id', (req, res) => {
+    const { id } = req.params;
+    const db = readDB();
+    const len = db.events.length;
+    db.events = db.events.filter(e => e.id !== id);
+
+    if (db.events.length === len) return res.status(404).json({ error: 'Event no trobat' });
+    writeDB(db);
+    res.json({ message: 'Event esborrat correctament' });
+});
+
 app.post('/api/event/:id/request', apiLimiter, (req,res) => {
     const { trackId, title, artist, cover } = req.body;
     const db = readDB();
@@ -230,7 +239,6 @@ app.post('/api/event/:id/song-status', (req,res) => {
 });
 
 /* -------------------- ROOT -------------------- */
-
 app.get('/', (req,res) => res.redirect('/client.html'));
 
 app.listen(PORT, () => {

@@ -3,139 +3,111 @@
 <head>
 <meta charset="UTF-8">
 <title>Panell DJ</title>
+
 <style>
-    body {
-        font-family:sans-serif;
-        margin:0;
-        padding:10px;
-        background:#121212;
-        color:#fff;
-    }
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 10px;
+    background: #121212;
+    color: #fff;
+}
 
-    /* TOP BAR */
-    .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: clamp(5px, 2vw, 20px);
-        flex-wrap: wrap;
-    }
-    .top-bar img {
-        height: clamp(40px, 8vw, 100px);
-        width: auto;
-    }
-    .top-bar h1 {
-        flex: 1;
-        text-align: center;
-        font-size: clamp(1rem, 3vw, 2rem);
-        margin: 0 10px;
-    }
+/* TOP BAR */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: clamp(5px, 2vw, 20px);
+}
+.top-bar img {
+    height: clamp(40px, 8vw, 100px);
+}
+.top-bar h1 {
+    flex: 1;
+    text-align: center;
+    font-size: clamp(1rem, 3vw, 2rem);
+}
 
-    /* FORMULARIS I BOTONS */
-    form {
-        text-align:center;
-        margin-bottom:20px;
-    }
-    input, select {
-        padding: clamp(5px, 1vw, 10px);
-        margin: 5px 5px;
-        border-radius:5px;
-        border:none;
-        font-size: clamp(0.8rem, 1.5vw, 1rem);
-    }
-    button {
-        background:#1db954;
-        color:#000;
-        border:none;
-        padding: clamp(5px,1vw,10px) clamp(10px,2vw,20px);
-        border-radius:5px;
-        cursor:pointer;
-        font-size: clamp(0.8rem,1.5vw,1rem);
-    }
-    button.btn-red { background:red; }
+/* FORMULARIS */
+form {
+    text-align: center;
+    margin-bottom: 20px;
+}
+input, select {
+    padding: 8px;
+    margin: 5px;
+    border-radius: 5px;
+    border: none;
+}
+button {
+    background: #1db954;
+    color: #000;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+button.btn-red {
+    background: red;
+}
 
-    /* CONTENIDOR TAULES */
+/* TAULES */
+.table-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    height: 70vh;
+}
+.table-wrapper {
+    background: rgba(0,0,0,0.6);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.table-wrapper tbody {
+    display: block;
+    overflow-y: auto;
+    max-height: calc(70vh - 60px);
+}
+.table-wrapper thead,
+.table-wrapper tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 6px;
+    border-bottom: 1px solid #333;
+}
+img {
+    width: 45px;
+    height: 45px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
     .table-container {
-        display:grid;
-        grid-template-columns:1fr 1fr 1fr;
-        gap:20px;
-        height:70vh;
+        grid-template-columns: 1fr;
     }
-    .table-wrapper {
-        display:flex;
-        flex-direction:column;
-        background:rgba(0,0,0,0.6);
-        border-radius:8px;
-        overflow:hidden;
-    }
-    .table-wrapper tbody {
-        display:block;
-        overflow-y:auto;
-        max-height:calc(70vh - 40px);
-    }
-    .table-wrapper thead, .table-wrapper tbody tr {
-        display:table;
-        width:100%;
-        table-layout:fixed;
-    }
-    table {
-        border-collapse:collapse;
-        width:100%;
-        font-size: clamp(0.7rem, 1.2vw, 0.9rem);
-    }
-    table th, table td {
-        padding:6px;
-        border-bottom:1px solid #333;
-        text-align:left;
-    }
-    table img {
-        width: clamp(30px,5vw,50px);
-        height: clamp(30px,5vw,50px);
-        border-radius:6px;
-        object-fit:cover;
-    }
-
-    /* BOTONS ACCIONS DJ */
-    .btn-dj {
-        width: clamp(20px,4vw,28px);
-        height: clamp(20px,4vw,28px);
-        padding:0;
-        font-size: clamp(12px,2vw,16px);
-        margin:0 2px;
-    }
-
-    /* MEDIA QUERIES PER MÒBILS */
-    @media (max-width: 768px) {
-        .table-container {
-            grid-template-columns: 1fr;
-        }
-        .top-bar img {
-            max-width:40%;
-            height: clamp(40px,10vw,60px);
-        }
-        .top-bar h1 {
-            font-size: clamp(1rem,4vw,1.5rem);
-        }
-        input, select {
-            width: 100%;
-            margin:5px 0;
-        }
-        table th, table td {
-            font-size: clamp(0.6rem,2vw,0.8rem);
-            padding:4px;
-        }
-    }
+}
 </style>
 </head>
+
 <body>
 
 <div class="top-bar">
-    <img src="/images/logo-right2.png" alt="Logo esquerra">
-    <h1> 🎛️ CONTROL PANEL 🎛️ </h1>
-    <img src="/images/logo-right2.png" alt="Logo dreta">
+    <img src="/images/logo-right2.png">
+    <h1>🎛️ CONTROL PANEL 🎛️</h1>
+    <img src="/images/logo-right2.png">
 </div>
 
-<div style="text-align:center; margin:20px 0;">
+<div style="text-align:center;margin:15px;">
     <button onclick="logout()">Sortir</button>
 </div>
 
@@ -147,38 +119,40 @@
 </form>
 
 <div style="text-align:center;margin-bottom:20px;">
-    <select id="eventSelector"><option value="">-- Tria un event --</option></select>
-    <button id="deleteEventBtn">Esborrar Event</button>
+    <select id="eventSelector">
+        <option value="">-- Tria un event --</option>
+    </select>
+    <button id="deleteEventBtn" class="btn-red">Esborrar Event</button>
     <p id="eventCodeDisplay"></p>
 </div>
 
 <div class="table-container">
     <div class="table-wrapper">
-        <div style="text-align:center;margin:5px;">
-            <h2>REQUESTED</h2>
-        </div>
+        <h3 style="text-align:center;">REQUESTED</h3>
         <table id="requestedTable">
-            <thead><tr><th>Portada</th><th>Títol</th><th>Artista</th><th>Vots</th><th>Accions</th></tr></thead>
+            <thead>
+                <tr><th>Portada</th><th>Títol</th><th>Artista</th><th>Vots</th><th></th></tr>
+            </thead>
             <tbody></tbody>
         </table>
     </div>
 
     <div class="table-wrapper">
-        <div style="text-align:center;margin:5px;">
-            <h2>PLAYED</h2>
-        </div>
+        <h3 style="text-align:center;">PLAYED</h3>
         <table id="playedTable">
-            <thead><tr><th>Portada</th><th>Títol</th><th>Artista</th></tr></thead>
+            <thead>
+                <tr><th>Portada</th><th>Títol</th><th>Artista</th></tr>
+            </thead>
             <tbody></tbody>
         </table>
     </div>
 
     <div class="table-wrapper">
-        <div style="text-align:center;margin:5px;">
-            <h2>REJECTED</h2>
-        </div>
+        <h3 style="text-align:center;">REJECTED</h3>
         <table id="rejectedTable">
-            <thead><tr><th>Portada</th><th>Títol</th><th>Artista</th></tr></thead>
+            <thead>
+                <tr><th>Portada</th><th>Títol</th><th>Artista</th></tr>
+            </thead>
             <tbody></tbody>
         </table>
     </div>
