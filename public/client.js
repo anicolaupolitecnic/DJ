@@ -22,7 +22,9 @@ joinBtn.addEventListener('click', async () => {
         const res = await fetch(`/api/event/${eventId}`);
         if (!res.ok) return alert('Event no trobat');
 
-        clientSection.style.display = 'block';
+        // Mostrar la secció client utilitzant classes
+        clientSection.classList.remove('hidden');
+
         fetchRequestedSongs();
         if (rankingInterval) clearInterval(rankingInterval);
         rankingInterval = setInterval(fetchRequestedSongs, 5000);

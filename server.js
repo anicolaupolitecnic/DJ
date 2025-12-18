@@ -19,7 +19,6 @@ const DJ_PASS = process.env.DJ_PASSWORD || '1234';
 const DB_FILE = path.join(__dirname, 'requests.json');
 
 /* -------------------- MIDDLEWARE -------------------- */
-
 app.use(express.json());
 
 app.use(session({
@@ -28,26 +27,19 @@ app.use(session({
     saveUninitialized: false
 }));
 
-app.use(express.static(path.join(__dirname, 'public'), {
-    index: false
-}));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 /* -------------------- AUTH DJ -------------------- */
-
 function requireDJAuth(req, res, next) {
     if (req.session.djLogged === true) return next();
     res.redirect('/dj-login.html');
 }
 
 /* -------------------- BASE DE DADES -------------------- */
-
 function readDB() {
     if (!fs.existsSync(DB_FILE)) return { events: [] };
-    try {
-        return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-    } catch {
-        return { events: [] };
-    }
+    try { return JSON.parse(fs.readFileSync(DB_FILE, 'utf8')); }
+    catch { return { events: [] }; }
 }
 
 function writeDB(data) {
@@ -55,15 +47,12 @@ function writeDB(data) {
 }
 
 /* -------------------- LOGIN DJ -------------------- */
-
 app.post('/api/dj/login', (req, res) => {
     const { username, password } = req.body;
-
     if (username === DJ_USER && password === DJ_PASS) {
         req.session.djLogged = true;
         return res.json({ ok: true });
     }
-
     res.status(401).json({ error: 'Credencials incorrectes' });
 });
 
@@ -75,17 +64,14 @@ app.post('/api/dj/logout', (req, res) => {
 app.get('/dj', requireDJAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dj.html'));
 });
-
 app.get('/dj.html', requireDJAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dj.html'));
 });
 
 /* -------------------- TOKEN SPOTIFY -------------------- */
-
 app.get('/api/token', (req, res) => {
     const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64');
     const postData = 'grant_type=client_credentials';
-
     const options = {
         hostname: 'accounts.spotify.com',
         port: 443,
@@ -97,7 +83,6 @@ app.get('/api/token', (req, res) => {
             'Content-Length': Buffer.byteLength(postData)
         }
     };
-
     const request = https.request(options, response => {
         let data = '';
         response.on('data', chunk => data += chunk);
@@ -106,17 +91,14 @@ app.get('/api/token', (req, res) => {
             catch { res.status(500).json({ error: 'Error processant token' }); }
         });
     });
-
     request.on('error', err => res.status(500).json({ error: err.message }));
     request.write(postData);
     request.end();
 });
 
 /* -------------------- CERCA SPOTIFY -------------------- */
-
 app.get('/api/search', async (req, res) => {
     if (!req.query.q) return res.status(400).json({ error: 'Missing query' });
-
     try {
         const tokenRes = await axios.post(
             'https://accounts.spotify.com/api/token',
@@ -128,16 +110,12 @@ app.get('/api/search', async (req, res) => {
                 }
             }
         );
-
         const token = tokenRes.data.access_token;
-
         const searchRes = await axios.get(
             `https://api.spotify.com/v1/search?q=${encodeURIComponent(req.query.q)}&type=track&limit=20`,
             { headers: { Authorization: `Bearer ${token}` } }
         );
-
         res.json(searchRes.data);
-
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Spotify error' });
@@ -145,27 +123,18 @@ app.get('/api/search', async (req, res) => {
 });
 
 /* -------------------- RATE LIMIT -------------------- */
-
-const apiLimiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 10
-});
+const apiLimiter = rateLimit({ windowMs: 60 * 1000, max: 10 });
 
 /* -------------------- EVENTS & SONGS -------------------- */
-
 app.post('/api/event', (req, res) => {
     const { name, date, code } = req.body;
     if (!name || !date) return res.status(400).json({ error: 'Nom i data requerits' });
-
     const db = readDB();
     const id = code?.trim() || Math.random().toString(36).substring(2,10);
-
     if (db.events.some(e => e.id === id))
         return res.status(400).json({ error: 'Codi ja existent' });
-
     db.events.push({ id, name, date, songs: [] });
     writeDB(db);
-
     res.json({ ok: true });
 });
 
@@ -180,13 +149,11 @@ app.get('/api/event/:id', (req,res) => {
     res.json(event);
 });
 
-/* ----------------- ESBORRAR EVENT ----------------- */
 app.delete('/api/event/:id', (req, res) => {
     const { id } = req.params;
     const db = readDB();
     const len = db.events.length;
     db.events = db.events.filter(e => e.id !== id);
-
     if (db.events.length === len) return res.status(404).json({ error: 'Event no trobat' });
     writeDB(db);
     res.json({ message: 'Event esborrat correctament' });
@@ -197,13 +164,18 @@ app.post('/api/event/:id/request', apiLimiter, (req,res) => {
     const db = readDB();
     const event = db.events.find(e => e.id === req.params.id);
     if (!event) return res.status(404).json({ error: 'Event no trobat' });
+    if (!event.songs) event.songs = [];
 
     let song = event.songs.find(s => s.trackId === trackId);
-    if (song) song.votes++;
-    else event.songs.push({
-        trackId, title, artist, cover,
-        votes: 1, status: 'sol·licitada'
-    });
+    if (song) {
+        song.votes++;
+        song.status = 'sol·licitada'; // assegurar que apareix a requested
+    } else {
+        event.songs.push({
+            trackId, title, artist, cover,
+            votes: 1, status: 'sol·licitada'
+        });
+    }
 
     writeDB(db);
     res.json({ ok:true, votes: song ? song.votes : 1 });
@@ -212,6 +184,7 @@ app.post('/api/event/:id/request', apiLimiter, (req,res) => {
 app.get('/api/event/:id/requested', (req,res) => {
     const event = readDB().events.find(e => e.id === req.params.id);
     if (!event) return res.status(404).json({ error:'Event no trobat' });
+    if (!event.songs) event.songs = [];
 
     res.json(
         event.songs
@@ -232,7 +205,6 @@ app.post('/api/event/:id/song-status', (req,res) => {
     const event = db.events.find(e => e.id === req.params.id);
     const song = event?.songs.find(s => s.trackId === trackId);
     if (!song) return res.status(404).json({ error:'Cançó no trobada' });
-
     song.status = status;
     writeDB(db);
     res.json({ ok:true });
@@ -241,6 +213,4 @@ app.post('/api/event/:id/song-status', (req,res) => {
 /* -------------------- ROOT -------------------- */
 app.get('/', (req,res) => res.redirect('/client.html'));
 
-app.listen(PORT, () => {
-    console.log(`Servidor actiu a http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Servidor actiu a http://localhost:${PORT}`));

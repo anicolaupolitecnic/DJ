@@ -3,127 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <title>Panell DJ</title>
-
-<style>
-body {
-    font-family: sans-serif;
-    margin: 0;
-    padding: 10px;
-    background: #121212;
-    color: #fff;
-    font-size: 18px;
-}
-
-/* TOP BAR */
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: clamp(5px, 2vw, 5px);
-}
-.top-bar img {
-        height: clamp(200px, 20vw, 300px);
-        width: auto;
-}
-.top-bar h1 {
-    flex: 1;
-    text-align: center;
-    font-size: clamp(1rem, 5vw, 10rem);
-}
-
-/* FORMULARIS */
-form {
-    text-align: center;
-    margin-bottom: 20px;
-}
-input, select {
-    padding: 8px;
-    margin: 5px;
-    border-radius: 5px;
-    border: none;
-    font-size: 18px;
-}
-
-button {
-    font-size: clamp(2rem, 2vw, 1.2rem);
-    background: #1db954;
-    color: #000;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-button.btn-red {
-    background: red;
-}
-
-/* TAULES */
-.table-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    height: 70vh;
-}
-.table-wrapper {
-    background: rgba(0,0,0,0.6);
-    border-radius: 8px;
-    overflow: hidden;
-}
-.table-wrapper tbody {
-    display: block;
-    overflow-y: auto;
-    max-height: calc(70vh - 60px);
-}
-.table-wrapper thead,
-.table-wrapper tbody tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-th, td {
-    padding: 6px;
-    border-bottom: 1px solid #333;
-}
-img {
-    width: 45px;
-    height: 45px;
-    border-radius: 6px;
-    object-fit: cover;
-}
-
-/* MOBILE */
-@media (max-width: 768px) {
-    .table-container {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="top-bar">
-    <img src="/images/logo-right2.png">
+    <img src="/images/logo-right2.png" alt="Logo esquerra">
     <h1>🎛️ CONTROL PANEL 🎛️</h1>
-    <img src="/images/logo-right2.png">
+    <img src="/images/logo-right2.png" alt="Logo dreta">
 </div>
 
-<div style="text-align:center;margin:15px;">
+<div class="logout-container">
     <button onclick="logout()">Sortir</button>
 </div>
 
-<form id="createEventForm">
+<form id="createEventForm" class="event-form">
     <input id="eventName" placeholder="Nom del event" required>
     <input id="eventCodeInput" placeholder="Codi opcional">
     <input id="eventDate" type="date" required>
     <button type="submit">Crear Event</button>
 </form>
 
-<div style="text-align:center;margin-bottom:20px;">
+<div class="event-selector-container">
     <select id="eventSelector">
         <option value="">-- Tria un event --</option>
     </select>
@@ -132,8 +34,8 @@ img {
 </div>
 
 <div class="table-container">
-    <div class="table-wrapper">
-        <h3 style="text-align:center;">REQUESTED</h3>
+    <div class="table-wrapper requested">
+        <h3>REQUESTED</h3>
         <table id="requestedTable">
             <thead>
                 <tr><th>Portada</th><th>Títol</th><th>Artista</th><th>Vots</th><th></th></tr>
@@ -142,8 +44,8 @@ img {
         </table>
     </div>
 
-    <div class="table-wrapper">
-        <h3 style="text-align:center;">PLAYED</h3>
+    <div class="table-wrapper played">
+        <h3>PLAYED</h3>
         <table id="playedTable">
             <thead>
                 <tr><th>Portada</th><th>Títol</th><th>Artista</th></tr>
@@ -152,8 +54,8 @@ img {
         </table>
     </div>
 
-    <div class="table-wrapper">
-        <h3 style="text-align:center;">REJECTED</h3>
+    <div class="table-wrapper rejected">
+        <h3>REJECTED</h3>
         <table id="rejectedTable">
             <thead>
                 <tr><th>Portada</th><th>Títol</th><th>Artista</th></tr>
